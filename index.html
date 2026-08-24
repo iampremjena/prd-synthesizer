@@ -66,48 +66,31 @@
 
     <script>
         async function generatePRD() {
-            let inputContent = document.getElementById('inputData').value.trim();
-            if (!inputContent) { alert("Please enter some notes or requirements first!"); return; }
+    let inputContent = document.getElementById('inputData').value.trim();
+    if (!inputContent) { alert("Please enter some notes!"); return; }
 
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('outputContainer').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('outputContainer').style.display = 'none';
 
-            try {
-                // Public demo gateway or fallback simulation if offline
-                let response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer sk-or-v1-placeholder-demo-key", // Replace with an active key if deploying publicly, or use backend proxy
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": window.location.origin,
-                        "X-Title": "PRD Tool"
-                    },
-                    body: JSON.stringify({
-                        "model": "deepseek/deepseek-chat",
-                        "messages": [
-                            { "role": "system", "content": "You are an elite Product Manager. Transform the user's raw notes into a rigorous, professional PRD format containing: 1. Executive Summary, 2. Target User Stories, 3. Acceptance Criteria (Given/When/Then), and 4. Technical Scope." },
-                            { "role": "user", "content": inputContent }
-                        ]
-                    })
-                });
+    try {
+        let response = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ input: inputContent })
+        });
 
-                let data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
+        let data = await response.json();
+        
+        if (data.error) throw new Error(data.error);
 
-                let resultText = data.choices[0].message.content;
-                document.getElementById('prdOutput').innerText = resultText;
-                document.getElementById('outputContainer').style.display = 'block';
-            } catch (err) {
-                // Graceful fallback fallback simulation so your tool never throws a hard crash locally
-                console.warn("Using offline structural simulation fallback due to missing active network key.");
-                simulateOfflinePRD(inputContent);
-            } finally {
-                document.getElementById('loadingState').style.display = 'none';
-            }
-        }
+        document.getElementById('prdOutput').innerText = data.output;
+        document.getElementById('outputContainer').style.display = 'block';
+    } catch (err) {
+        alert("Error generating PRD: " + err.message);
+    } finally {
+        document.getElementById('loadingState').style.display = 'none';
+    }
+}
 
         function simulateOfflinePRD(text) {
             let simulatedMarkdown = `# Product Requirements Document (PRD)\n\n` +
