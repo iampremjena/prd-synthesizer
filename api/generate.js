@@ -31,7 +31,8 @@ Ensure the PRD adheres to these strict product architecture standards:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "google/gemini-2.5-flash", // High-speed, high-reasoning model
+        "model": "google/gemini-2.5-flash",
+        "max_tokens": 4000,
         "messages": [
           { role: "system", content: systemPrompt },
           { role: "user", content: input }
